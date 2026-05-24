@@ -32,9 +32,17 @@ class BitcoinExchange
 		BitcoinExchange& operator=(BitcoinExchange const &other);
 		BitcoinExchange(const std::string &dataFile);
 
+		typedef std::map<std::string, std::string>::iterator iterator;
+		typedef std::map<std::string, std::string>::const_iterator const_iterator;
+
 		void extractFile(const std::string &dataFile);
+		void calcValue(const std::string fileName);
 
 		class FileNotOpenException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
+		class IncorrectFileTypeException : public std::exception {
 			public:
 				const char *what() const throw();
 		} ;

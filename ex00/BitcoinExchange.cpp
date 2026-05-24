@@ -51,10 +51,26 @@ void BitcoinExchange::extractFile(const std::string &dataFile)
 		rate = line.substr(commaPos + 1);
 		btcData[date] = rate;
     }
+	// for (iterator it = btcData.begin(); it != btcData.end(); it++)
+	// 	std::cout << it->first << " -> " << it->second << std::endl;
 	filein.close();
+}
+
+void BitcoinExchange::calcValue(const std::string filename)
+{
+	if (filename.find(".txt") == std::string::npos)
+		throw IncorrectFileTypeException();
+	std::ifstream inputFile(filename);
+	if (!inputFile.is_open())
+		throw FileNotOpenException();
 }
 
 const char* BitcoinExchange::FileNotOpenException::what() const throw()
 {
 	return("Error: Could not open file");
+}
+
+const char* BitcoinExchange::IncorrectFileTypeException::what() const throw()
+{
+	return("Error: Database must be a txt file");
 }
