@@ -17,10 +17,13 @@
 # include <iostream>
 # include <fstream>
 # include <exception>
+# include <sstream>
+# include <map>
 
 class BitcoinExchange
 {
 	private:
+		std::map<std::string, std::string> btcData;
 
 	public:
 		BitcoinExchange();
@@ -30,6 +33,11 @@ class BitcoinExchange
 		BitcoinExchange(const std::string &dataFile);
 
 		void extractFile(const std::string &dataFile);
+
+		class FileNotOpenException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
 } ;
 
 #endif
