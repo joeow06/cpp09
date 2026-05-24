@@ -22,8 +22,8 @@ int main(int argc, char **argv)
 	}
 	try
 	{
-		(void)argv;
 		BitcoinExchange btc("data.csv");
+		btc.calcValue(argv[1]);
 	}
 	catch (const std::exception &e)
 	{
