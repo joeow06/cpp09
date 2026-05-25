@@ -25,6 +25,9 @@ class BitcoinExchange
 	private:
 		std::map<std::string, std::string> btcData;
 
+		bool validateDate(std::string &priceDate);
+		bool validateValue();
+
 	public:
 		BitcoinExchange();
 		~BitcoinExchange();
@@ -43,6 +46,20 @@ class BitcoinExchange
 				const char *what() const throw();
 		} ;
 		class IncorrectFileTypeException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
+		class InvalidDateException : public std::exception {
+			private:
+				std::string message;
+			public:
+				InvalidDateException(const std::string &date);
+				~InvalidDateException() throw() {}
+    			const char* what() const throw() {
+        			return message.c_str();
+     			}
+		} ;
+		class InvalidValueException : public std::exception {
 			public:
 				const char *what() const throw();
 		} ;

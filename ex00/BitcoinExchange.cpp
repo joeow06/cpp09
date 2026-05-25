@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "BitcoinExchange.hpp"
+#include <cstddef>
 
 BitcoinExchange::BitcoinExchange() {}
 
@@ -58,11 +59,74 @@ void BitcoinExchange::extractFile(const std::string &dataFile)
 
 void BitcoinExchange::calcValue(const std::string filename)
 {
+	std::string line, priceDate, priceValue;
+	size_t spacePos;
+
 	if (filename.find(".txt") == std::string::npos)
 		throw IncorrectFileTypeException();
 	std::ifstream inputFile(filename);
 	if (!inputFile.is_open())
 		throw FileNotOpenException();
+	getline(inputFile, line);
+	while (getline(inputFile, line))
+	{
+		if (line.empty())
+			continue;
+		spacePos = line.find(" | ");
+		priceDate = line.substr(0, spacePos);
+		priceValue = line.substr(spacePos + 3);
+		try {
+			if (!validateDate(priceDate))
+				throw InvalidDateException(priceDate);
+			if (!validateValue())
+				throw InvalidValueException();
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what() << std::endl;
+			continue ;
+		}
+		std::cout << priceDate << " -> " << priceValue << std::endl;
+	}
+}
+
+bool BitcoinExchange::validateValue()
+{
+
+}
+
+bool BitcoinExchange::validateDate(std::string &priceDate)
+{
+	int year, month, day;
+	size_t sep1, sep2;
+	bool isLeapYear;
+
+	sep1 = priceDate.find('-');
+	sep2 = priceDate.find('-', sep1 + 1);
+	try {
+		year = std::stoi(priceDate.substr(0, sep1));
+		month = std::stoi(priceDate.substr(sep1 + 1, sep2 - sep1 - 1));
+		day = std::stoi(priceDate.substr(sep2 + 1, std::string::npos));
+	}
+	catch (const std::exception &e)
+	{
+		return false;
+	}
+
+	if (month < 1 || month > 12)
+		return false;
+    // days in each month (non-leap year)
+    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    // check for leap year
+    // A year is a leap year if it is evenly divisible by 4
+    // except for end-of-century years, which must be evenly divisible by 400
+    isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+    if (isLeapYear)
+    	daysInMonth[1] = 29;
+    if (day < 1 || day > daysInMonth[month - 1]) {
+    	return false;
+    }
+	return true;
 }
 
 const char* BitcoinExchange::FileNotOpenException::what() const throw()
@@ -73,4 +137,12 @@ const char* BitcoinExchange::FileNotOpenException::what() const throw()
 const char* BitcoinExchange::IncorrectFileTypeException::what() const throw()
 {
 	return("Error: Database must be a txt file");
+}
+
+BitcoinExchange::InvalidDateException::InvalidDateException(const std::string &date)
+	: message("Error: bad input => " + date) {}
+
+const char* BitcoinExchange::InvalidValueException::what() const throw()
+{
+
 }
