@@ -11,7 +11,9 @@
 /* ************************************************************************** */
 
 #include "BitcoinExchange.hpp"
+#include <climits>
 #include <cstddef>
+#include <limits>
 
 BitcoinExchange::BitcoinExchange() {}
 
@@ -78,21 +80,32 @@ void BitcoinExchange::calcValue(const std::string filename)
 		try {
 			if (!validateDate(priceDate))
 				throw InvalidDateException(priceDate);
-			if (!validateValue())
-				throw InvalidValueException();
+			if (validateValue(priceValue))
+				std::cout << "ok" << std::endl;
 		}
 		catch (const std::exception &e)
 		{
 			std::cout << e.what() << std::endl;
 			continue ;
 		}
-		std::cout << priceDate << " -> " << priceValue << std::endl;
+		std::cout << priceDate << " => " << priceValue << std::endl;
 	}
 }
 
-bool BitcoinExchange::validateValue()
+bool BitcoinExchange::validateValue(std::string &priceValue)
 {
-
+	float value;
+	try {
+		value = std::stof(priceValue);
+	}
+	catch (const std::exception &e) {
+		throw NotANumberException();
+	}
+	if (value < 0)
+		throw NegativeNumberException();
+	if (value > 1000)
+		throw TooLargeException();
+	return true;
 }
 
 bool BitcoinExchange::validateDate(std::string &priceDate)
@@ -131,18 +144,28 @@ bool BitcoinExchange::validateDate(std::string &priceDate)
 
 const char* BitcoinExchange::FileNotOpenException::what() const throw()
 {
-	return("Error: Could not open file");
+	return ("Error: Could not open file");
 }
 
 const char* BitcoinExchange::IncorrectFileTypeException::what() const throw()
 {
-	return("Error: Database must be a txt file");
+	return ("Error: Database must be a txt file");
 }
 
 BitcoinExchange::InvalidDateException::InvalidDateException(const std::string &date)
 	: message("Error: bad input => " + date) {}
 
-const char* BitcoinExchange::InvalidValueException::what() const throw()
+const char* BitcoinExchange::TooLargeException::what() const throw()
 {
+	return ("Error: too large of a number");
+}
 
+const char* BitcoinExchange::NegativeNumberException::what() const throw()
+{
+	return ("Error: not a positive number");
+}
+
+const char* BitcoinExchange::NotANumberException::what() const throw()
+{
+	return ("Error: value is not a number");
 }

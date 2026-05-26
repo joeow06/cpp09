@@ -26,7 +26,7 @@ class BitcoinExchange
 		std::map<std::string, std::string> btcData;
 
 		bool validateDate(std::string &priceDate);
-		bool validateValue();
+		bool validateValue(std::string &priceValue);
 
 	public:
 		BitcoinExchange();
@@ -59,7 +59,15 @@ class BitcoinExchange
         			return message.c_str();
      			}
 		} ;
-		class InvalidValueException : public std::exception {
+		class TooLargeException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
+		class NegativeNumberException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
+		class NotANumberException : public std::exception {
 			public:
 				const char *what() const throw();
 		} ;
