@@ -26,7 +26,8 @@ class BitcoinExchange
 		std::map<std::string, std::string> btcData;
 
 		bool validateDate(std::string &priceDate);
-		bool validateValue(std::string &priceValue);
+		void validateAmount(std::string &priceValue);
+		float getRate(std::string &date);
 
 	public:
 		BitcoinExchange();
@@ -68,6 +69,10 @@ class BitcoinExchange
 				const char *what() const throw();
 		} ;
 		class NotANumberException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
+		class DateNotFoundException : public std::exception {
 			public:
 				const char *what() const throw();
 		} ;

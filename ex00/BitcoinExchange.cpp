@@ -61,8 +61,9 @@ void BitcoinExchange::extractFile(const std::string &dataFile)
 
 void BitcoinExchange::calcValue(const std::string filename)
 {
-	std::string line, priceDate, priceValue;
+	std::string line, date, amount;
 	size_t spacePos;
+	float rateF, amountF, total;
 
 	if (filename.find(".txt") == std::string::npos)
 		throw IncorrectFileTypeException();
@@ -75,24 +76,49 @@ void BitcoinExchange::calcValue(const std::string filename)
 		if (line.empty())
 			continue;
 		spacePos = line.find(" | ");
-		priceDate = line.substr(0, spacePos);
-		priceValue = line.substr(spacePos + 3);
+		date = line.substr(0, spacePos);
+		amount = line.substr(spacePos + 3);
 		try {
-			if (!validateDate(priceDate))
-				throw InvalidDateException(priceDate);
-			if (validateValue(priceValue))
-				std::cout << "ok" << std::endl;
+			if (!validateDate(date))
+				throw InvalidDateException(date);
+			validateAmount(amount);
+			rateF = getRate(date);
 		}
 		catch (const std::exception &e)
 		{
 			std::cout << e.what() << std::endl;
-			continue ;
+			continue;
 		}
-		std::cout << priceDate << " => " << priceValue << std::endl;
+		std::stringstream ss(amount);
+		ss >> amountF;
+		total = amountF * rateF;
+		std::cout << date << " => " << amount << " = " << total << std::endl;
 	}
 }
 
-bool BitcoinExchange::validateValue(std::string &priceValue)
+float BitcoinExchange::getRate(std::string &date)
+{
+	std::string rate;
+	float rateF;
+
+	iterator it = btcData.lower_bound(date);
+	if ((it != btcData.end()) && (it->first == date))
+		rate = it->second;
+	else if (it != btcData.begin())
+	{
+		--it;
+		rate = it->second;
+	}
+	else
+		throw DateNotFoundException();
+
+	std::stringstream ss(rate);
+	ss >> rateF;
+
+	return rateF;
+}
+
+void BitcoinExchange::validateAmount(std::string &priceValue)
 {
 	float value;
 	try {
@@ -105,7 +131,6 @@ bool BitcoinExchange::validateValue(std::string &priceValue)
 		throw NegativeNumberException();
 	if (value > 1000)
 		throw TooLargeException();
-	return true;
 }
 
 bool BitcoinExchange::validateDate(std::string &priceDate)
@@ -168,4 +193,9 @@ const char* BitcoinExchange::NegativeNumberException::what() const throw()
 const char* BitcoinExchange::NotANumberException::what() const throw()
 {
 	return ("Error: value is not a number");
+}
+
+const char* BitcoinExchange::DateNotFoundException::what() const throw()
+{
+	return ("Error: date cannot be found");
 }
