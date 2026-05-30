@@ -11,9 +11,7 @@
 /* ************************************************************************** */
 
 #include "BitcoinExchange.hpp"
-#include <climits>
 #include <cstddef>
-#include <limits>
 
 BitcoinExchange::BitcoinExchange() {}
 
