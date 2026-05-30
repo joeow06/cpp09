@@ -50,6 +50,10 @@ class BitcoinExchange
 			public:
 				const char *what() const throw();
 		} ;
+		class IncorrectFormatException : public std::exception {
+			public:
+				const char *what() const throw();
+		} ;
 		class InvalidDateException : public std::exception {
 			private:
 				std::string message;

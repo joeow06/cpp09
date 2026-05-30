@@ -75,10 +75,12 @@ void BitcoinExchange::calcValue(const std::string filename)
 	{
 		if (line.empty())
 			continue;
-		spacePos = line.find(" | ");
-		date = line.substr(0, spacePos);
-		amount = line.substr(spacePos + 3);
 		try {
+			spacePos = line.find(" | ");
+			if (spacePos == std::string::npos)
+				throw IncorrectFormatException();
+			date = line.substr(0, spacePos);
+			amount = line.substr(spacePos + 3);
 			if (!validateDate(date))
 				throw InvalidDateException(date);
 			validateAmount(amount);
@@ -175,6 +177,11 @@ const char* BitcoinExchange::FileNotOpenException::what() const throw()
 const char* BitcoinExchange::IncorrectFileTypeException::what() const throw()
 {
 	return ("Error: Database must be a txt file");
+}
+
+const char* BitcoinExchange::IncorrectFormatException::what() const throw()
+{
+	return ("Error: invalid format [date | value]");
 }
 
 BitcoinExchange::InvalidDateException::InvalidDateException(const std::string &date)
