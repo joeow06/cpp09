@@ -21,8 +21,8 @@ PmergeMe& PmergeMe::operator=(const PmergeMe &other)
 {
 	if (this != &other)
 	{
-		_deq = other._deq;
 		_vec = other._vec;
+		_deq = other._deq;
 	}
 	return *this;
 }
@@ -46,9 +46,19 @@ void PmergeMe::addNumber(const std::string &str)
 	if (!isValidNumber(str))
 		throw std::invalid_argument("Error: Invalid number");
 	int num = std::atoi(str.c_str());
-	_deq.push_back(num);
 	_vec.push_back(num);
+	_deq.push_back(num);
 }
 
 std::deque<int>& PmergeMe::getDeque() { return _deq; }
 std::vector<int>& PmergeMe::getVector() { return _vec; }
+
+void PmergeMe::sortVector()
+{
+
+}
+
+void PmergeMe::sortDeque()
+{
+
+}

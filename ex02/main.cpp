@@ -15,15 +15,27 @@
 int main(int argc, char **argv)
 {
 	if (argc < 2)
-		return 1;
+	{
+		std::cerr << "Error: invalid number of arguments" << std::endl;
+		return (1);
+	}
 
 	PmergeMe container;
-	for (int i = 1; i < argc; i++)
-	{
-		container.addNumber(argv[i]);
+	try {
+		for (int i = 1; i < argc; i++)
+		{
+			container.addNumber(argv[i]);
+		}
 	}
-	container.print(container.getDeque(), "deque");
-	container.print(container.getVector(), "vector");
+	catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
+	// container.print(container.getDeque(), "deque");
+	// container.print(container.getVector(), "vector");
 
-	return 0;
+	container.sortVector();
+	container.sortDeque();
+
+	return (0);
 }

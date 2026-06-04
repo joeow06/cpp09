@@ -20,8 +20,8 @@
 class PmergeMe
 {
 	private:
-		std::deque<int> _deq;
 		std::vector<int> _vec;
+		std::deque<int> _deq;
 		bool isValidNumber(const std::string &str) const;
 
 	public:
@@ -31,6 +31,8 @@ class PmergeMe
 		~PmergeMe();
 
 		void addNumber(const std::string &str);
+		void sortVector();
+		void sortDeque();
 
 		template <typename Container>
 		void print(Container &cont, const std::string &str)
