@@ -32,11 +32,11 @@ int main(int argc, char **argv)
 		return (1);
 	}
 	// container.print(container.getDeque(), "deque");
-	container.print(container.getVector(), "vector");
+	// container.print(container.getVector(), "vector");
 
 	container.sort();
-	// container.printResult();
-	container.print(container.getVector(), "vector result");
+	container.printResult(true);
+	// container.print(container.getVector(), "vector result");
 
 	return (0);
 }

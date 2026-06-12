@@ -12,10 +12,12 @@
 
 #include "PmergeMe.hpp"
 #include <ctime>
+#include <iomanip>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
-PmergeMe::PmergeMe() {}
+PmergeMe::PmergeMe() : _vecTime(0), _deqTime(0), _vecNum(0), _deqNum(0) {}
 
 PmergeMe::PmergeMe(const PmergeMe &other) : _vec(other._vec), _deq(other._deq) {}
 
@@ -123,7 +125,7 @@ void PmergeMe::sortVector()
 		{
 			int first = _vec[i];
 			int second = _vec[i + 1];
-			nb_comp++;
+			_vecNum++;
 			if (first < second)
 				std::swap(first, second);
 			pairs.push_back(std::make_pair(first, second));
@@ -147,8 +149,7 @@ void PmergeMe::sortVector()
 			pendChain.push_back(pairs[i].second);
 		if (!pendChain.empty())
 		{
-			std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(), pendChain[0]);
-			nb_comp++;
+			std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(), pendChain[0], CountingComparator(&_vecNum));
 			result.insert(pos, pendChain[0]);
 		}
 		if (pendChain.size() > 1)
@@ -159,8 +160,7 @@ void PmergeMe::sortVector()
 	            int idx = insertionOrder[i];
 	            if (idx > 0 && idx < (int)pendChain.size()) // make sure the index is valid and processing after the 0 ( first elem is 0 which had been inserted)
 	            {
-	                std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(),  pendChain[idx]); // remain pend chain element insert to the result in the correct position
-					nb_comp++;
+	                std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(),  pendChain[idx], CountingComparator(&_vecNum)); // remain pend chain element insert to the result in the correct position
 	                result.insert(pos,  pendChain[idx]);
 	            }
          	}
@@ -169,7 +169,6 @@ void PmergeMe::sortVector()
     if (hasStraggler)
     {
         std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(), straggler); // insert the straggler to the result in the correct position
-        nb_comp++;
         result.insert(pos, straggler);
     }
 
@@ -179,16 +178,114 @@ void PmergeMe::sortVector()
 
 void PmergeMe::sortDeque()
 {
+    if (_deq.size() <= 1)
+        return;
 
+    bool hasStraggler = false;
+    int straggler = 0;
+
+    if (_deq.size() % 2 != 0)
+    {
+        hasStraggler = true;
+        straggler = _deq.back();
+        _deq.pop_back();
+    }
+
+    std::deque<std::pair<int, int> > pairs;
+    for (size_t i = 0; i < _deq.size(); i += 2)
+    {
+        int first = _deq[i];
+        int second = _deq[i + 1];
+        _deqNum++;
+        if (first < second)
+            std::swap(first, second);
+        pairs.push_back(std::make_pair(first, second));
+    }
+
+    std::deque<int> mainChain;
+    for (size_t i = 0; i < pairs.size(); i++)
+    {
+        mainChain.push_back(pairs[i].first);
+    }
+
+    if (mainChain.size() > 1)
+    {
+        _deq = mainChain;
+        sortDeque();
+        mainChain = _deq;
+    }
+
+    std::deque<int> result = mainChain;
+
+    std::deque<int> pendChain;
+    for (size_t i = 0; i < pairs.size(); i++)
+    {
+        pendChain.push_back(pairs[i].second);
+    }
+
+    if (!pendChain.empty())
+    {
+        std::deque<int>::iterator pos = std::lower_bound(result.begin(), result.end(), pendChain[0], CountingComparator(&_deqNum));
+        result.insert(pos, pendChain[0]);
+    }
+
+    if (pendChain.size() > 1)
+    {
+        std::vector<int> insertionOrder = getInsertPos(pendChain.size());
+
+        for (size_t i = 0; i < insertionOrder.size(); i++)
+        {
+            int idx = insertionOrder[i];
+            if (idx > 0 && idx < (int)pendChain.size())
+            {
+                std::deque<int>::iterator pos = std::lower_bound(result.begin(), result.end(), pendChain[idx], CountingComparator(&_deqNum));
+                result.insert(pos, pendChain[idx]);
+            }
+        }
+    }
+
+    if (hasStraggler)
+    {
+        std::deque<int>::iterator pos = std::lower_bound(result.begin(), result.end(), straggler);
+        result.insert(pos, straggler);
+    }
+
+    _deq = result;
 }
 
 void PmergeMe::sort()
 {
+	_ori = _vec;
+
 	clock_t vec_start = clock();
-	nb_comp = 0;
 	sortVector();
 	clock_t vec_end = clock();
-	std::cout << "Time: " << static_cast<double>(vec_end - vec_start) / CLOCKS_PER_SEC * 1000000 << std::endl;
-	std::cout << "Number of Comparisons: " << nb_comp << std::endl;
+	_vecTime = static_cast<double>(vec_end - vec_start) / CLOCKS_PER_SEC;
+
+	clock_t deq_start = clock();
 	sortDeque();
+	clock_t deq_end = clock();
+	_deqTime = static_cast<double>(deq_end - deq_start) / CLOCKS_PER_SEC;
+}
+
+void PmergeMe::printResult(bool showComp)
+{
+	std::cout << "Before: ";
+	print(_ori);
+	std::cout << "After [Vector]: ";
+	print(_vec);
+	std::cout << "After [Deque] : ";
+	print(_deq);
+	std::cout << "Time to process a range of " << _vec.size()
+		<< " elements with std::vector : " << std::fixed << std::setprecision(5)
+		<< _vecTime << " s" << std::endl;
+	std::cout << "Time to process a range of " << _deq.size()
+		<< " elements with std::deque : " << std::fixed << std::setprecision(5)
+		<< _deqTime << " s" << std::endl;
+
+	if (showComp)
+	{
+		std::cout << "Number of Comparisons [Vector] : " << _vecNum << std::endl;
+		std::cout << "Number of Comparisons [Deque]  : " << _deqNum << std::endl;
+	}
 }
