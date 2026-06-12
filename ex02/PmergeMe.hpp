@@ -16,13 +16,17 @@
 # include <iostream>
 # include <deque>
 # include <vector>
+# include <ctime>
 
 class PmergeMe
 {
 	private:
 		std::vector<int> _vec;
 		std::deque<int> _deq;
+		int nb_comp;
 		bool isValidNumber(const std::string &str) const;
+		std::vector<int> getInsertPos(size_t size);
+		std::vector<int> getJacob(size_t size);
 
 	public:
 		PmergeMe();
@@ -33,6 +37,7 @@ class PmergeMe
 		void addNumber(const std::string &str);
 		void sortVector();
 		void sortDeque();
+		void sort();
 
 		template <typename Container>
 		void print(Container &cont, const std::string &str)
