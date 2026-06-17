@@ -357,13 +357,11 @@ void PmergeMe::sort()
 	_ori = _vec;
 
 	clock_t vec_start = clock();
-	_vecNum = 0;
 	sortVector(1);
 	clock_t vec_end = clock();
 	_vecTime = static_cast<double>(vec_end - vec_start) / CLOCKS_PER_SEC;
 
 	clock_t deq_start = clock();
-	_deqNum = 0;
 	sortDeque(1);
 	clock_t deq_end = clock();
 	_deqTime = static_cast<double>(deq_end - deq_start) / CLOCKS_PER_SEC;
