@@ -31,12 +31,9 @@ int main(int argc, char **argv)
 		std::cerr << e.what() << std::endl;
 		return (1);
 	}
-	// container.print(container.getDeque(), "deque");
-	// container.print(container.getVector(), "vector");
 
 	container.sort();
 	container.printResult(true);
-	// container.print(container.getVector(), "vector result");
 
 	return (0);
 }
