@@ -121,12 +121,10 @@ float BitcoinExchange::getRate(std::string &date)
 void BitcoinExchange::validateAmount(std::string &priceValue)
 {
 	float value;
-	try {
-		value = std::stof(priceValue);
-	}
-	catch (const std::exception &e) {
+	std::stringstream ss(priceValue);
+	ss >> value;
+	if (ss.fail())
 		throw NotANumberException();
-	}
 	if (value < 0)
 		throw NegativeNumberException();
 	if (value > 1000)
@@ -141,15 +139,17 @@ bool BitcoinExchange::validateDate(std::string &priceDate)
 
 	sep1 = priceDate.find('-');
 	sep2 = priceDate.find('-', sep1 + 1);
-	try {
-		year = std::stoi(priceDate.substr(0, sep1));
-		month = std::stoi(priceDate.substr(sep1 + 1, sep2 - sep1 - 1));
-		day = std::stoi(priceDate.substr(sep2 + 1, std::string::npos));
-	}
-	catch (const std::exception &e)
-	{
+
+	std::stringstream ssYear(priceDate.substr(0, sep1));
+	std::stringstream ssMonth(priceDate.substr(sep1 + 1, sep2 - sep1 - 1));
+	std::stringstream ssDay(priceDate.substr(sep2 + 1));
+
+	ssYear >> year;
+	ssMonth >> month;
+	ssDay >> day;
+
+	if (ssYear.fail() || ssMonth.fail() || ssDay.fail())
 		return false;
-	}
 
 	if (month < 1 || month > 12)
 		return false;
