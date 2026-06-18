@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	}
 
 	container.sort();
-	container.printResult(true);
+	container.printResult(false);
 
 	return (0);
 }

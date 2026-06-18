@@ -63,7 +63,7 @@ void BitcoinExchange::calcValue(const std::string filename)
 	size_t spacePos;
 	float rateF, amountF, total;
 
-	if (filename.find(".txt") == std::string::npos || filename.find(".csv") == std::string::npos)
+	if (filename.find(".txt") == std::string::npos && filename.find(".csv") == std::string::npos)
 		throw IncorrectFileTypeException();
 	std::ifstream inputFile(filename.c_str());
 	if (!inputFile.is_open())

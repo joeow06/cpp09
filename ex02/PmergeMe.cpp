@@ -75,21 +75,27 @@ long jacobsthalNumber(long n)
 void PmergeMe::sortVector(int pair_level)
 {
 	typedef std::vector<int>::iterator VecIt;
-
-	int pair_units_nbr = static_cast<int>(_vec.size()) / pair_level;
+	int pair_units_nbr;
+	bool is_odd;
+	
+	pair_units_nbr = static_cast<int>(_vec.size()) / pair_level;
 	if (pair_units_nbr < 2)
 		return;
+	is_odd = pair_units_nbr % 2 == 1;
 
-	bool is_odd = pair_units_nbr % 2 == 1;
-
-	// exclude odd pairs
+	/* 
+	* - exclude odd pairs
+	* - odd pair[end -> last]
+	*/
 	VecIt start = _vec.begin();
 	VecIt last = _vec.begin();
 	std::advance(last, pair_level * pair_units_nbr);
 	VecIt end = last;
 	std::advance(end, -(is_odd * pair_level));
 
-	// swap pairs by comparing pair leaders
+	/*
+	* - swapping pairs (bx, ax)
+	*/
 	int jump = 2 * pair_level;
 	for (VecIt it = start; it != end; std::advance(it, jump))
 	{
@@ -105,23 +111,21 @@ void PmergeMe::sortVector(int pair_level)
 		}
 	}
 
-	// recursion with x2 pairs (2, 4, 8, ...)
+	/* recursion to next level */
 	sortVector(pair_level * 2);
 
-	// a vector of iterators
 	std::vector<VecIt> main;
 	std::vector<VecIt> pend;
 
-	// initialize main with {b1, a1}
+	/* initialise main with (b1, a1) */
 	VecIt b1 = _vec.begin();
 	std::advance(b1, pair_level - 1);
 	main.push_back(b1);
-
 	VecIt a1 = _vec.begin();
 	std::advance(a1, pair_level * 2 - 1);
 	main.push_back(a1);
 
-	// rest of a's to main, b's to pend
+	/* rest of a's to main, b's to pend */
 	for (int i = 4; i <= pair_units_nbr; i += 2)
 	{
 		VecIt bi = _vec.begin();
@@ -132,8 +136,7 @@ void PmergeMe::sortVector(int pair_level)
 		std::advance(ai, pair_level * i - 1);
 		main.push_back(ai);
 	}
-
-	// odd element goes to pend
+	/* odd element goes to pend */
 	if (is_odd)
 	{
 		VecIt odd = end;
@@ -141,11 +144,14 @@ void PmergeMe::sortVector(int pair_level)
 		pend.push_back(odd);
 	}
 
-	// Insert pend into main using Jacobsthal order with bounded binary search
+	/* 
+	* insert pend into main using Jacobsthal & bounded binary search 
+	*/
 	int prev_jacobsthal = jacobsthalNumber(1);
 	int inserted_numbers = 0;
+	int k = 2;
 
-	for (int k = 2;; k++)
+	while (1)
 	{
 		int curr_jacobsthal = jacobsthalNumber(k);
 		int jacobsthal_diff = curr_jacobsthal - prev_jacobsthal;
@@ -154,7 +160,7 @@ void PmergeMe::sortVector(int pair_level)
 		// insert normally if not enough number
 		if (jacobsthal_diff > static_cast<int>(pend.size()))
 			break;
-
+ 
 		int nbr_of_times = jacobsthal_diff;
 		std::vector<VecIt>::iterator pend_it = pend.begin();
 		std::advance(pend_it, jacobsthal_diff - 1);
@@ -170,6 +176,7 @@ void PmergeMe::sortVector(int pair_level)
 			pend_it = pend.erase(pend_it);
 			if (pend_it != pend.begin())
 				std::advance(pend_it, -1);
+			// offset keeps boundary in check
 			if ((inserted - main.begin()) == curr_jacobsthal + inserted_numbers)
 				offset++;
 			bound_it = main.begin();
@@ -177,9 +184,10 @@ void PmergeMe::sortVector(int pair_level)
 		}
 		prev_jacobsthal = curr_jacobsthal;
 		inserted_numbers += jacobsthal_diff;
+		k++;
 	}
 
-	// Insert remaining pend elements
+	/* insert remaining pend elements */
 	for (int i = static_cast<int>(pend.size()) - 1; i >= 0; i--)
 	{
 		std::vector<VecIt>::iterator curr_pend = pend.begin();
@@ -194,7 +202,7 @@ void PmergeMe::sortVector(int pair_level)
 		main.insert(idx, *curr_pend);
 	}
 
-	// copy sorted values back
+	/* copy sorted values back */
 	std::vector<int> copy;
 	copy.reserve(_vec.size());
 	for (std::vector<VecIt>::iterator it = main.begin(); it != main.end(); ++it)
@@ -220,12 +228,13 @@ void PmergeMe::sortVector(int pair_level)
 void PmergeMe::sortDeque(int pair_level)
 {
 	typedef std::deque<int>::iterator DeqIt;
-
-	int pair_units_nbr = static_cast<int>(_deq.size()) / pair_level;
+	int pair_units_nbr;
+	bool is_odd;
+	
+	pair_units_nbr = static_cast<int>(_deq.size()) / pair_level;
 	if (pair_units_nbr < 2)
 		return;
-
-	bool is_odd = pair_units_nbr % 2 == 1;
+	is_odd = pair_units_nbr % 2 == 1;
 
 	DeqIt start = _deq.begin();
 	DeqIt last = _deq.begin();
@@ -233,7 +242,6 @@ void PmergeMe::sortDeque(int pair_level)
 	DeqIt end = last;
 	std::advance(end, -(is_odd * pair_level));
 
-	// Swap pairs by comparing pair leaders
 	int jump = 2 * pair_level;
 	for (DeqIt it = start; it != end; std::advance(it, jump))
 	{
@@ -249,23 +257,18 @@ void PmergeMe::sortDeque(int pair_level)
 		}
 	}
 
-	// Recurse with doubled pair level
 	sortDeque(pair_level * 2);
 
-	// Build main and pend chains with iterators
 	std::vector<DeqIt> main;
 	std::vector<DeqIt> pend;
 
-	// Initialize main with {b1, a1}
 	DeqIt b1 = _deq.begin();
 	std::advance(b1, pair_level - 1);
 	main.push_back(b1);
-
 	DeqIt a1 = _deq.begin();
 	std::advance(a1, pair_level * 2 - 1);
 	main.push_back(a1);
 
-	// Rest of a's to main, b's to pend
 	for (int i = 4; i <= pair_units_nbr; i += 2)
 	{
 		DeqIt bi = _deq.begin();
@@ -277,7 +280,6 @@ void PmergeMe::sortDeque(int pair_level)
 		main.push_back(ai);
 	}
 
-	// Odd element goes to pend
 	if (is_odd)
 	{
 		DeqIt odd = end;
@@ -285,11 +287,10 @@ void PmergeMe::sortDeque(int pair_level)
 		pend.push_back(odd);
 	}
 
-	// Insert pend into main using Jacobsthal order with bounded binary search
 	int prev_jacobsthal = jacobsthalNumber(1);
 	int inserted_numbers = 0;
-
-	for (int k = 2;; k++)
+	int k = 2;
+	while (1)
 	{
 		int curr_jacobsthal = jacobsthalNumber(k);
 		int jacobsthal_diff = curr_jacobsthal - prev_jacobsthal;
@@ -320,9 +321,9 @@ void PmergeMe::sortDeque(int pair_level)
 		}
 		prev_jacobsthal = curr_jacobsthal;
 		inserted_numbers += jacobsthal_diff;
+		k++;
 	}
 
-	// Insert remaining pend elements
 	for (int i = static_cast<int>(pend.size()) - 1; i >= 0; i--)
 	{
 		std::vector<DeqIt>::iterator curr_pend = pend.begin();
@@ -337,7 +338,6 @@ void PmergeMe::sortDeque(int pair_level)
 		main.insert(idx, *curr_pend);
 	}
 
-	// Copy sorted values back
 	std::vector<int> copy;
 	copy.reserve(_deq.size());
 	for (std::vector<DeqIt>::iterator it = main.begin(); it != main.end(); ++it)
@@ -387,7 +387,7 @@ void PmergeMe::printResult(bool showComp)
 		<< " elements with std::vector : " << std::fixed << std::setprecision(5)
 		<< _vecTime << " s" << std::endl;
 	std::cout << "Time to process a range of " << _deq.size()
-		<< " elements with std::deque : " << std::fixed << std::setprecision(5)
+		<< " elements with std::deque  : " << std::fixed << std::setprecision(5)
 		<< _deqTime << " s" << std::endl;
 
 	if (showComp)
