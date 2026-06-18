@@ -33,7 +33,7 @@ private:
 	bool isValidNumber(const std::string &str) const;
 
 	template <typename T>
-	void _swapPair(T it, int pair_level);
+	void swapPair(T it, int pair_level);
 
 public:
 	PmergeMe();
@@ -80,7 +80,7 @@ struct IteratorComparator
 
 // Template implementation for _swapPair
 template <typename T>
-void PmergeMe::_swapPair(T it, int pair_level)
+void PmergeMe::swapPair(T it, int pair_level)
 {
 	T start = it;
 	std::advance(start, -pair_level + 1);

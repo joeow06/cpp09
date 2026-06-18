@@ -82,13 +82,14 @@ void PmergeMe::sortVector(int pair_level)
 
 	bool is_odd = pair_units_nbr % 2 == 1;
 
+	// exclude odd pairs
 	VecIt start = _vec.begin();
 	VecIt last = _vec.begin();
 	std::advance(last, pair_level * pair_units_nbr);
 	VecIt end = last;
 	std::advance(end, -(is_odd * pair_level));
 
-	// Swap pairs by comparing pair leaders
+	// swap pairs by comparing pair leaders
 	int jump = 2 * pair_level;
 	for (VecIt it = start; it != end; std::advance(it, jump))
 	{
@@ -100,18 +101,18 @@ void PmergeMe::sortVector(int pair_level)
 		_vecNum++;
 		if (*next_pair < *this_pair)
 		{
-			_swapPair(this_pair, pair_level);
+			swapPair(this_pair, pair_level);
 		}
 	}
 
-	// Recurse with doubled pair level
+	// recursion with x2 pairs (2, 4, 8, ...)
 	sortVector(pair_level * 2);
 
-	// Build main and pend chains with iterators
+	// a vector of iterators
 	std::vector<VecIt> main;
 	std::vector<VecIt> pend;
 
-	// Initialize main with {b1, a1}
+	// initialize main with {b1, a1}
 	VecIt b1 = _vec.begin();
 	std::advance(b1, pair_level - 1);
 	main.push_back(b1);
@@ -120,7 +121,7 @@ void PmergeMe::sortVector(int pair_level)
 	std::advance(a1, pair_level * 2 - 1);
 	main.push_back(a1);
 
-	// Rest of a's to main, b's to pend
+	// rest of a's to main, b's to pend
 	for (int i = 4; i <= pair_units_nbr; i += 2)
 	{
 		VecIt bi = _vec.begin();
@@ -132,7 +133,7 @@ void PmergeMe::sortVector(int pair_level)
 		main.push_back(ai);
 	}
 
-	// Odd element goes to pend
+	// odd element goes to pend
 	if (is_odd)
 	{
 		VecIt odd = end;
@@ -150,6 +151,7 @@ void PmergeMe::sortVector(int pair_level)
 		int jacobsthal_diff = curr_jacobsthal - prev_jacobsthal;
 		int offset = 0;
 
+		// insert normally if not enough number
 		if (jacobsthal_diff > static_cast<int>(pend.size()))
 			break;
 
@@ -168,7 +170,8 @@ void PmergeMe::sortVector(int pair_level)
 			pend_it = pend.erase(pend_it);
 			if (pend_it != pend.begin())
 				std::advance(pend_it, -1);
-			offset += (inserted - main.begin()) == curr_jacobsthal + inserted_numbers ? 1 : 0;
+			if ((inserted - main.begin()) == curr_jacobsthal + inserted_numbers)
+				offset++;
 			bound_it = main.begin();
 			std::advance(bound_it, curr_jacobsthal + inserted_numbers - offset);
 		}
@@ -182,14 +185,16 @@ void PmergeMe::sortVector(int pair_level)
 		std::vector<VecIt>::iterator curr_pend = pend.begin();
 		std::advance(curr_pend, i);
 		std::vector<VecIt>::iterator curr_bound = main.begin();
-		std::advance(curr_bound, static_cast<int>(main.size()) -
-			static_cast<int>(pend.size()) + i + (is_odd ? 1 : 0));
+		int bound_pos = static_cast<int>(main.size()) - static_cast<int>(pend.size()) + i;
+		if (is_odd)
+			bound_pos++;
+		std::advance(curr_bound, bound_pos);
 		std::vector<VecIt>::iterator idx =
 			std::upper_bound(main.begin(), curr_bound, *curr_pend, IteratorComparator<VecIt>(&_vecNum));
 		main.insert(idx, *curr_pend);
 	}
 
-	// Copy sorted values back
+	// copy sorted values back
 	std::vector<int> copy;
 	copy.reserve(_vec.size());
 	for (std::vector<VecIt>::iterator it = main.begin(); it != main.end(); ++it)
@@ -240,7 +245,7 @@ void PmergeMe::sortDeque(int pair_level)
 		_deqNum++;
 		if (*next_pair < *this_pair)
 		{
-			_swapPair(this_pair, pair_level);
+			swapPair(this_pair, pair_level);
 		}
 	}
 
@@ -308,7 +313,8 @@ void PmergeMe::sortDeque(int pair_level)
 			pend_it = pend.erase(pend_it);
 			if (pend_it != pend.begin())
 				std::advance(pend_it, -1);
-			offset += (inserted - main.begin()) == curr_jacobsthal + inserted_numbers ? 1 : 0;
+			if ((inserted - main.begin()) == curr_jacobsthal + inserted_numbers)
+				offset++;
 			bound_it = main.begin();
 			std::advance(bound_it, curr_jacobsthal + inserted_numbers - offset);
 		}
@@ -322,8 +328,10 @@ void PmergeMe::sortDeque(int pair_level)
 		std::vector<DeqIt>::iterator curr_pend = pend.begin();
 		std::advance(curr_pend, i);
 		std::vector<DeqIt>::iterator curr_bound = main.begin();
-		std::advance(curr_bound, static_cast<int>(main.size()) -
-			static_cast<int>(pend.size()) + i + (is_odd ? 1 : 0));
+		int bound_pos = static_cast<int>(main.size()) - static_cast<int>(pend.size()) + i;
+		if (is_odd)
+			bound_pos++;
+		std::advance(curr_bound, bound_pos);
 		std::vector<DeqIt>::iterator idx =
 			std::upper_bound(main.begin(), curr_bound, *curr_pend, IteratorComparator<DeqIt>(&_deqNum));
 		main.insert(idx, *curr_pend);
