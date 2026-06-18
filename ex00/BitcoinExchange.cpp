@@ -65,7 +65,7 @@ void BitcoinExchange::calcValue(const std::string filename)
 
 	if (filename.find(".txt") == std::string::npos)
 		throw IncorrectFileTypeException();
-	std::ifstream inputFile(filename);
+	std::ifstream inputFile(filename.c_str());
 	if (!inputFile.is_open())
 		throw FileNotOpenException();
 	getline(inputFile, line);
